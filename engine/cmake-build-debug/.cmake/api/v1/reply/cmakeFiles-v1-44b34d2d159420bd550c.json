@@ -763,8 +763,8 @@
 	"kind" : "cmakeFiles",
 	"paths" : 
 	{
-		"build" : "/home/kai/Documents/Cappuccino/cmake-build-debug",
-		"source" : "/home/kai/Documents/Cappuccino"
+		"build" : "/home/kai/Documents/Cappuccino/engine/cmake-build-debug",
+		"source" : "/home/kai/Documents/Cappuccino/engine"
 	},
 	"version" : 
 	{

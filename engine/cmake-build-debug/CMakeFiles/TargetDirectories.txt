@@ -1,0 +1,3 @@
+/home/kai/Documents/Cappuccino/engine/cmake-build-debug/CMakeFiles/engine.dir
+/home/kai/Documents/Cappuccino/engine/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/kai/Documents/Cappuccino/engine/cmake-build-debug/CMakeFiles/rebuild_cache.dir

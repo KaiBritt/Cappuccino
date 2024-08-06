@@ -55,7 +55,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/home/kai/Documents/Cappuccino/cmake-build-debug"
+			"value" : "/home/kai/Documents/Cappuccino/engine/cmake-build-debug"
 		},
 		{
 			"name" : "CMAKE_CACHE_MAJOR_VERSION",
@@ -543,7 +543,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/home/kai/Documents/Cappuccino/cmake-build-debug/CMakeFiles/pkgRedirects"
+			"value" : "/home/kai/Documents/Cappuccino/engine/cmake-build-debug/CMakeFiles/pkgRedirects"
 		},
 		{
 			"name" : "CMAKE_GENERATOR",
@@ -603,7 +603,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/home/kai/Documents/Cappuccino"
+			"value" : "/home/kai/Documents/Cappuccino/engine"
 		},
 		{
 			"name" : "CMAKE_INSTALL_PREFIX",
@@ -843,7 +843,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "Cappuccino"
+			"value" : "engine"
 		},
 		{
 			"name" : "CMAKE_RANLIB",
@@ -1142,7 +1142,19 @@
 			"value" : "FALSE"
 		},
 		{
-			"name" : "Cappuccino_BINARY_DIR",
+			"name" : "_CMAKE_LINKER_PUSHPOP_STATE_SUPPORTED",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "linker supports push/pop state"
+				}
+			],
+			"type" : "INTERNAL",
+			"value" : "TRUE"
+		},
+		{
+			"name" : "engine_BINARY_DIR",
 			"properties" : 
 			[
 				{
@@ -1151,10 +1163,10 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/home/kai/Documents/Cappuccino/cmake-build-debug"
+			"value" : "/home/kai/Documents/Cappuccino/engine/cmake-build-debug"
 		},
 		{
-			"name" : "Cappuccino_IS_TOP_LEVEL",
+			"name" : "engine_IS_TOP_LEVEL",
 			"properties" : 
 			[
 				{
@@ -1166,7 +1178,7 @@
 			"value" : "ON"
 		},
 		{
-			"name" : "Cappuccino_SOURCE_DIR",
+			"name" : "engine_SOURCE_DIR",
 			"properties" : 
 			[
 				{
@@ -1175,19 +1187,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/home/kai/Documents/Cappuccino"
-		},
-		{
-			"name" : "_CMAKE_LINKER_PUSHPOP_STATE_SUPPORTED",
-			"properties" : 
-			[
-				{
-					"name" : "HELPSTRING",
-					"value" : "linker supports push/pop state"
-				}
-			],
-			"type" : "INTERNAL",
-			"value" : "TRUE"
+			"value" : "/home/kai/Documents/Cappuccino/engine"
 		}
 	],
 	"kind" : "cache",
