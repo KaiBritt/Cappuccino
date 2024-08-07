@@ -8,7 +8,8 @@
 void print_bit_board(unsigned long long bitboard) {
     for (int row = 0; row < 8; row++) {
         for (int col = 0; col < 8; col++) {
-            if ((bitboard & (9223372036854775808UL >> (row*8 + col))) != 0) {
+            unsigned long long two_to_63 = 9223372036854775808UL;
+            if ((bitboard & (two_to_63 >> (row*8 + col))) != 0) {
                 printf("1");
             }
             else {
@@ -32,7 +33,6 @@ Board::Board(char * FEN) {
     while (FEN[FEN_size] != '\0') {
         FEN_size++;
     }
-    printf("%d\n", '8' - '0');
     for (int cc = 0; cc < FEN_size; cc++){
 
             if (FEN[cc] == '/') {
@@ -54,7 +54,6 @@ Board::Board(char * FEN) {
         bitboards[m['D']] |= bitboards[m['D'] + i];
         bitboards[m['W']] |= bitboards[m['W'] + i];
      }
-    print_bit_board(bitboards[m['p']]);
 
     //making human readable board #from bb
     char charMap[15] = "DprnbqkWPRNBQK";
@@ -69,6 +68,8 @@ Board::Board(char * FEN) {
                 letterbox[j] = charToPoint[charMap[i]];
             }
         }
+
     }
+
 }
 
