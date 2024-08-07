@@ -1,7 +1,7 @@
 #ifndef GLOBAL_HPP
 
 #define ULL unsigned long long
-
+#pragma once
 #define PAWN 100
 #define KNIGHT 300
 #define BISHOP 320
@@ -12,6 +12,7 @@
 #include <iostream>
 #include <list>
 #include <map>
+#include <array>
 
 enum PieceType{
  black, p, r,n, b, q, k, white, P, R, N, B, Q, K

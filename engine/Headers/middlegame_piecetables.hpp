@@ -4,6 +4,7 @@
 
 #ifndef MIDDLEGAME_PIECETABLES_HPP
 #define MIDDLEGAME_PIECETABLES_HPP
+#include "Global.hpp"
 
 inline std::array<int,64> mg_king_table = {
     -65, 23, 16, -15, -56, -34, 2, 13,
@@ -72,12 +73,12 @@ inline std::array<int,64> mg_pawn_table = {
 };
 
 const std::map<int, std::array<int, 64>> mg_piece_tables = {
-    { 100, mg_pawn_table},
-    { 300, mg_knight_table},
-    { 320, mg_bishop_table},
-    { 500, mg_rook_table},
-    { 900, mg_queen_table},
-    { 20000, mg_king_table}
+    { PAWN, mg_pawn_table},
+    { KNIGHT, mg_knight_table},
+    { BISHOP, mg_bishop_table},
+    { ROOK, mg_rook_table},
+    { QUEEN, mg_queen_table},
+    { KING, mg_king_table}
 };
 
 #endif //MIDDLEGAME_PIECETABLES_HPP

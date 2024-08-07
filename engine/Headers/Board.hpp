@@ -5,9 +5,8 @@
 #ifndef BOARD_H
 #define BOARD_H
 
-#include <map>
-#include <array>
-#include <iostream>
+#include "Global.hpp"
+
 class Board
 {
 public:

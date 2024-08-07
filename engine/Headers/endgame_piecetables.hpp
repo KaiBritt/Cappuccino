@@ -6,7 +6,7 @@
 
 #ifndef ENDGAME_PIECETABLES_HPP
 #define ENDGAME_PIECETABLES_HPP
-#include <map>
+#include "Global.hpp"
 
 inline std::array<int,64> eg_pawn_table = {
     0,   0,   0,   0,   0,   0,   0,   0,
@@ -75,12 +75,12 @@ inline std::array<int,64> eg_king_table = {
 };
 
 const std::map<int, std::array<int, 64>> eg_piece_tables = {
-    { 100, eg_pawn_table},
-    { 300, eg_knight_table},
-    { 320, eg_bishop_table},
-    { 500, eg_rook_table},
-    { 900, eg_queen_table},
-    { 20000, eg_king_table}
+    { PAWN, eg_pawn_table},
+    { KNIGHT, eg_knight_table},
+    { BISHOP, eg_bishop_table},
+    { ROOK, eg_rook_table},
+    { QUEEN, eg_queen_table},
+    { KING, eg_king_table}
 };
 
 #endif //ENDGAME_PIECETABLES_HPP
