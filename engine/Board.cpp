@@ -2,7 +2,7 @@
 // Created by kai on 8/6/24.
 //
 
-#include "Board.hpp"
+#include "./Headers/Board.hpp"
 
 
 void print_bit_board(unsigned long long bitboard) {
@@ -58,7 +58,7 @@ Board::Board(char * FEN) {
 
     //making human readable board #from bb
     char charMap[15] = "DprnbqkWPRNBQK";
-    std::map<char,int> charToPoint{{'D',0},{'p',-100},{'r',-500},{'n',-300},{'b',-320},{'q',-900},{'k',-400},{'W',0},{'P',100},{'R',500},{'N',300},{'B',320},{'Q',900},{'K',4000}};
+    std::map<char,int> charToPoint{{'D',0},{'p',-100},{'r',-500},{'n',-300},{'b',-320},{'q',-900},{'k',-20000},{'W',0},{'P',100},{'R',500},{'N',300},{'B',320},{'Q',900},{'K',20000}};
     for (int & val : letterbox) {
         val = 0;
     }
