@@ -11,11 +11,9 @@
 #define ROOK 500
 #define QUEEN 900
 #define KING 20000
-#include <iostream>
-#include <list>
-#include <map>
-#include <bit>
-
+#include <fstream>
+#include <string>
+#include <iomanip>
 
 struct move{
     int startIndex;
@@ -26,6 +24,13 @@ struct move{
 
 std::list<move> get_moves(std::map<int, ULL> pieceBitBoards);
 
-std::array<std::map<int, ULL>, 64> GenerateLookupTable();
+std::array<std::map<int, ULL>, 64> generate_lookup_table();
+
+void store_lookup_tables(std::array<std::map<int, ULL>, 64> tables);
+std::array<std::map<int, ULL>, 64> load_lookup_tables();
+
+std::string md5(const std::string &str);
+bool validate_lookup_table();
+
 void print_bit_board(ULL bitboard);
 #endif

@@ -5,14 +5,32 @@
 #include "Headers/Global.hpp"
 #include "Headers/Moves.hpp"
 
-std::list<move> get_moves(std::map<int, ULL> pieceBitBoards){
-    
-    std::list<move> moveList = std::list<move>();
+std::array<std::map<int, ULL>, 64> LookupTable;
 
-    return moveList;
+/// @brief 
+/// Gets legal moves for specific piece
+// [STILL NEEDS TO BE IMPLEMENTED]
+/// @param pieceIndex 
+/// Index of the piece whos moves we want
+/// @return 
+/// Returns a bitboard for where this piece can move
+ULL get_legal_moves(int pieceIndex){
+    // make sure the lookup table is assigned
+    // (dont worry map.empty() is O(1) so this is fine for repeated use)
+    if (LookupTable[0].empty())
+    {
+        LookupTable = load_lookup_tables();
+    }
+
+    // STILL NEEDS TO BE IMPLEMENTED
+    return LookupTable[0][p];
 }
 
-std::array<std::map<int, ULL>, 64> GenerateLookupTable(){
+/// @brief 
+/// If LookupTables.dat exists use load_lookup_tables instead
+/// @return 
+/// Returns array of maps with lookup tables
+std::array<std::map<int, ULL>, 64> generate_lookup_table(){
     std::array<std::map<int, ULL>, 64> lookupTable;
 
     for(int i = 0; i < 64; i++)
@@ -142,7 +160,84 @@ std::array<std::map<int, ULL>, 64> GenerateLookupTable(){
     return lookupTable;
 }
 
+/// @brief 
+/// Stores tables lookups table into a LookupTables.dat file in binary format
+/// @param tables 
+/// the table we want to push into LookupTables.dat
+void store_lookup_tables(std::array<std::map<int, ULL>, 64> tables){
+    // Create a file to write into
+    std::ofstream ofs("LookupTables.dat", std::ios::binary | std::ios::out);
+
+        // Just to make sure
+        if (!ofs) {
+        std::cerr << "Error opening file for writing: LookupTables.dat" << std::endl;
+        return;
+    }
+
+    // Convert everything into binary and write it out like a good boy
+    for (const auto& mapElement : tables) {
+        size_t mapSize = mapElement.size();
+        ofs.write(reinterpret_cast<const char*>(&mapSize), sizeof(mapSize));
+
+        for (const auto& pair : mapElement) {
+            ofs.write(reinterpret_cast<const char*>(&pair.first), sizeof(pair.first));
+            ofs.write(reinterpret_cast<const char*>(&pair.second), sizeof(pair.second));
+        }
+    }
+
+    ofs.close();
+}
+
+/// @brief 
+/// Loads the LookupTables.dat file
+/// @return 
+/// A std::array<std::map<int, ULL>, 64> in which you can do var[pieceIndex][PieceType] to geth the bitmap. For example: "myTable[42][p]"
+std::array<std::map<int, ULL>, 64> load_lookup_tables() {
+    std::array<std::map<int, ULL>, 64> tables;
+    // We start a information stream where we read the tables in binary
+    std::ifstream ifs("LookupTables.dat", std::ios::binary | std::ios::in);
+
+    // Just a cheecky check to se if everything is as it should be
+    if (!ifs) {
+        std::cerr << "Error opening file for reading: LookupTables.dat" << std::endl;
+        return tables;
+    }
+
+    // Read out the binary to form maps and put them in new elements
+    for (auto& mapElement : tables) {
+        size_t mapSize;
+        ifs.read(reinterpret_cast<char*>(&mapSize), sizeof(mapSize));
+
+        for (size_t i = 0; i < mapSize; ++i) {
+            int key;
+            ULL value;
+            ifs.read(reinterpret_cast<char*>(&key), sizeof(key));
+            ifs.read(reinterpret_cast<char*>(&value), sizeof(value));
+            mapElement[key] = value;
+        }
+    }
+
+    // No memory leaks here
+    ifs.close();
+
+    return tables;
+}
+
+/// @brief 
+/// UNIMPLEMENTED
+/// @return 
+/// Wether the lookup table that is saved is valid
+bool validate_lookup_table(){
+
+    return true;
+}
+
+/// @brief 
+/// Prints a bitboard into the terminal in a human readable format
+/// @param bitboard 
+/// The bitboard to print out
 void print_bit_board(ULL bitboard) {
+    // Idk, this is mosh code
     for (int row = 0; row < 8; row++) {
         for (int col = 0; col < 8; col++) {
             ULL two_to_63 = 9223372036854775808UL;
