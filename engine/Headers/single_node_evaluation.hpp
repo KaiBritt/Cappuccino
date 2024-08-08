@@ -8,16 +8,20 @@
 #include "endgame_piecetables.hpp"
 #include "middlegame_piecetables.hpp"
 
-struct piece_values
+struct evaluations
 {
-    int whitePieceTotal;
-    int blackPieceTotal;
-    int totalPieceEval;
+    int mgEvaluation;
+    int egEvaluation;
 };
+constexpr int pPhase = 0;
+constexpr int nPhase = 1;
+constexpr int bPhase = 1;
+constexpr int rPhase = 2;
+constexpr int qPhase = 4;
 
-inline bool endgame = false;
 int flip_square(int index);
 int evaluate_node(const std::array<int,64>& board);
-piece_values evaluate_piece_values(const std::array<int,64>& board);
+int calculate_phase(const std::array<int,64>& board);
+evaluations evaluate_piece_values(const std::array<int,64>& board);
 
 #endif //SINGLE_NODE_EVALUATION_HPP
