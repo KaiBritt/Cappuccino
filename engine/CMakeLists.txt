@@ -9,5 +9,7 @@ add_executable(engine main.cpp
         Headers/endgame_piecetables.hpp
         Headers/middlegame_piecetables.hpp
         Headers/Board.hpp
+        Headers/Moves.hpp
         Board.cpp
+        Moves.cpp
 )

@@ -18,7 +18,7 @@ int evaluate_node(const std::array<int,64>& board) {
     evaluations evaluation = evaluate_piece_values(board);
     // calculate game phase for tapered evaluation
     const int phase = calculate_phase(board);
-    printf("eval: %i, %i\n", evaluation.mgEvaluation, evaluation.egEvaluation);
+
     return (((evaluation.mgEvaluation * (256 - phase)) + (evaluation.egEvaluation * phase)) / 256);
 }
 

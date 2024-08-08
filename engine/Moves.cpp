@@ -4,26 +4,30 @@
 
 #include "Headers/Global.hpp"
 #include "Headers/Moves.hpp"
+#include "Headers/Board.hpp"
 
-std::array<std::map<int, ULL>, 64> LookupTable;
+std::array<std::map<int, ULL>, 64> lookupTable;
 
-/// @brief 
-/// Gets legal moves for specific piece
-// [STILL NEEDS TO BE IMPLEMENTED]
-/// @param pieceIndex 
-/// Index of the piece whos moves we want
-/// @return 
-/// Returns a bitboard for where this piece can move
-ULL get_legal_moves(int pieceIndex){
+std::list<move> get_legal_moves(Board board){
+
+    std::list<move> whiteMoves;
+    std::list<move> blackMoves;
+
     // make sure the lookup table is assigned
     // (dont worry map.empty() is O(1) so this is fine for repeated use)
-    if (LookupTable[0].empty())
+    if (lookupTable[0].empty())
     {
-        LookupTable = load_lookup_tables();
+        lookupTable = load_lookup_tables();
+    }
+    //index of specific bitboards: 0 = black; 1 = p; 2 = r; 3 = n; 4 = b; 5 = q; 6 = k; 7 = white; 8 = p; 9 = r; 10 = n; 11 = b; 12 = q; 13 = k;
+
+    for(int i = 0; i <= 63; i++){
+        int pieceType = board.letterbox[i];
+
     }
 
     // STILL NEEDS TO BE IMPLEMENTED
-    return LookupTable[0][p];
+    return whiteMoves;
 }
 
 /// @brief 
@@ -41,7 +45,7 @@ std::array<std::map<int, ULL>, 64> generate_lookup_table(){
         int distanceTop = 7 - i / 8;
         int distanceBot = i / 8;
 
-        // Start with pawns
+        // Start with pawns Black
         ULL possibleMoves = 0;
 
         if(distanceTop >= 2) possibleMoves += (1ul << (i + 16));
@@ -50,7 +54,17 @@ std::array<std::map<int, ULL>, 64> generate_lookup_table(){
         if(distanceTop >= 1 && distanceRight >= 1) possibleMoves += (1ul << (i + 7));
 
         lookupTable[63 - i].insert({p, possibleMoves});
-        lookupTable[63 - i].insert({P, __builtin_bswap64(possibleMoves)});
+
+        // Proceed with White pawns
+
+        possibleMoves = 0;
+
+        if(distanceBot >= 2) possibleMoves += (1ul << (i - 16));
+        if(distanceBot >= 1) possibleMoves += (1ul << (i - 8));
+        if(distanceBot >= 1 && distanceLeft >= 1) possibleMoves += (1ul << (i - 9));
+        if(distanceBot >= 1 && distanceRight >= 1) possibleMoves += (1ul << (i - 7));
+
+        lookupTable[63 - i].insert({P, possibleMoves});
 
     // then rooks
         possibleMoves = 0;
@@ -160,7 +174,7 @@ std::array<std::map<int, ULL>, 64> generate_lookup_table(){
     return lookupTable;
 }
 
-/// @brief 
+/// @brief
 /// Stores tables lookups table into a LookupTables.dat file in binary format
 /// @param tables 
 /// the table we want to push into LookupTables.dat
@@ -230,26 +244,4 @@ std::array<std::map<int, ULL>, 64> load_lookup_tables() {
 bool validate_lookup_table(){
 
     return true;
-}
-
-/// @brief 
-/// Prints a bitboard into the terminal in a human readable format
-/// @param bitboard 
-/// The bitboard to print out
-void print_bit_board(ULL bitboard) {
-    // Idk, this is mosh code
-    for (int row = 0; row < 8; row++) {
-        for (int col = 0; col < 8; col++) {
-            ULL two_to_63 = 9223372036854775808UL;
-            if ((bitboard & (two_to_63 >> (row*8 + col))) != 0) {
-                printf("1");
-            }
-            else {
-                printf("0");
-            }
-        }
-        printf("\n");
-    }
-
-    return;
 }
