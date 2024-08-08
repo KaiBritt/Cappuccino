@@ -72,7 +72,7 @@ inline std::array<int,64> mg_pawn_table = {
     0, 0, 0, 0, 0, 0, 0, 0,
 };
 
-const std::map<int, std::array<int, 64>> mg_piece_tables = {
+inline std::map<int, std::array<int, 64>> mg_piece_tables = {
     { PAWN, mg_pawn_table},
     { KNIGHT, mg_knight_table},
     { BISHOP, mg_bishop_table},

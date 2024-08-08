@@ -74,7 +74,7 @@ inline std::array<int,64> eg_king_table = {
     -53, -34, -21, -11, -28, -14, -24, -43
 };
 
-const std::map<int, std::array<int, 64>> eg_piece_tables = {
+inline std::map<int, std::array<int, 64>> eg_piece_tables = {
     { PAWN, eg_pawn_table},
     { KNIGHT, eg_knight_table},
     { BISHOP, eg_bishop_table},
