@@ -12,7 +12,7 @@
 #include "Headers/Board.hpp"
 
 using BlockerTableArray = std::array<std::unordered_map<int, std::unordered_map<ULL,ULL>>, 64>;
-using LookupTableArray = std::array<std::map<int, ULL>, 64>;
+using LookupTableArray = std::array<std::unordered_map<int, ULL>, 64>;
 LookupTableArray lookupTable;
 BlockerTableArray blockerTable;
 
@@ -20,8 +20,8 @@ BlockerTableArray blockerTable;
 /// If LookupTables.dat exists use load_lookup_tables instead
 /// @return 
 /// Returns array of maps with lookup tables
-std::array<std::map<int, ULL>, 64> generate_lookup_table(){
-    std::array<std::map<int, ULL>, 64> lookupTable;
+LookupTableArray generate_lookup_table(){
+    LookupTableArray lookupTable;
 
     for(int i = 0; i < 64; i++)
     {
@@ -169,7 +169,7 @@ std::array<std::map<int, ULL>, 64> generate_lookup_table(){
 /// Stores tables lookups table into a LookupTables.dat file in binary format
 /// @param tables 
 /// the table we want to push into LookupTables.dat
-void store_lookup_tables(std::array<std::map<int, ULL>, 64> tables){
+void store_lookup_tables(LookupTableArray tables){
     // Create a file to write into
     std::ofstream ofs("LookupTables.dat", std::ios::binary | std::ios::out);
 
@@ -197,8 +197,8 @@ void store_lookup_tables(std::array<std::map<int, ULL>, 64> tables){
 /// Loads the LookupTables.dat file
 /// @return 
 /// A std::array<std::map<int, ULL>, 64> in which you can do var[pieceIndex][PieceType] to geth the bitmap. For example: "myTable[42][p]"
-std::array<std::map<int, ULL>, 64> load_lookup_tables() {
-    std::array<std::map<int, ULL>, 64> tables;
+LookupTableArray load_lookup_tables() {
+    LookupTableArray tables;
     // We start an information stream where we read the tables in binary
     std::ifstream ifs("LookupTables.dat", std::ios::binary | std::ios::in);
 
@@ -365,8 +365,8 @@ std::unordered_map<ULL, ULL> generate_blocker_map(int position, ULL movement_map
 /// Generate all blocker tables, for rook and bishop, to be used during legal move generation
 /// @return
 /// std::array<std::map<int, std::map<ULL,ULL>>, 64> blocker lookup table
-std::array<std::unordered_map<int, std::unordered_map<ULL,ULL>>, 64>blocker_lookup_table( std::array<std::map<int, ULL>, 64> movement_lookup_table) {
-    std::array<std::unordered_map<int, std::unordered_map<ULL,ULL>>, 64> table;
+BlockerTableArray blocker_lookup_table(LookupTableArray movement_lookup_table) {
+    BlockerTableArray table;
     for (int i = 0; i < 64; i++) {
         std::cout << i << std::endl;
         table[i][r] = generate_blocker_map(i,movement_lookup_table[i][r],find_rook_legal_moves);
