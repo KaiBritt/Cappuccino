@@ -6,49 +6,15 @@
 #include "Headers/Moves.hpp"
 
 #include <random>
+#include <unordered_map>
 #include <vector>
 
 #include "Headers/Board.hpp"
 
-std::array<std::map<int, ULL>, 64> lookupTable;
-
-std::list<move> get_legal_moves(Board board){
-
-    std::list<move> whiteMoves;
-    std::list<move> blackMoves;
-
-    // make sure the lookup table is assigned
-    // (dont worry map.empty() is O(1) so this is fine for repeated use)
-    if (lookupTable[0].empty())
-    {
-        lookupTable = load_lookup_tables();
-    }
-    //index of specific bitboards: 0 = black; 1 = p; 2 = r; 3 = n; 4 = b; 5 = q; 6 = k; 7 = white; 8 = p; 9 = r; 10 = n; 11 = b; 12 = q; 13 = k;
-    std::array<ULL,64> pseduo_legal_moves = std::array<ULL,64>();
-    std::array<ULL,64> takes_legal_moves= std::array<ULL,64>();
-    for(int i = 0; i <= 63; i++)
-    {
-        int pieceType = pointToIdx[board.letterbox[i]];
-        //
-        pseduo_legal_moves[i] = lookupTable[pieceType][i];
-        ULL takes, occupied;
-        if(pieceType < white)
-        {
-            takes = pseduo_legal_moves[i] & board.bitboards[white];
-        }
-        else{
-            takes = pseduo_legal_moves[i] & board.bitboards[black];
-        }
-        occupied = pseduo_legal_moves[i] & (board.bitboards[white] | board.bitboards[black]);
-        takes_legal_moves[i] =0;
-
-    }
-
-
-
-    // STILL NEEDS TO BE IMPLEMENTED
-    return whiteMoves;
-}
+using BlockerTableArray = std::array<std::unordered_map<int, std::unordered_map<ULL,ULL>>, 64>;
+using LookupTableArray = std::array<std::map<int, ULL>, 64>;
+LookupTableArray lookupTable;
+BlockerTableArray blockerTable;
 
 /// @brief 
 /// If LookupTables.dat exists use load_lookup_tables instead
@@ -233,7 +199,7 @@ void store_lookup_tables(std::array<std::map<int, ULL>, 64> tables){
 /// A std::array<std::map<int, ULL>, 64> in which you can do var[pieceIndex][PieceType] to geth the bitmap. For example: "myTable[42][p]"
 std::array<std::map<int, ULL>, 64> load_lookup_tables() {
     std::array<std::map<int, ULL>, 64> tables;
-    // We start a information stream where we read the tables in binary
+    // We start an information stream where we read the tables in binary
     std::ifstream ifs("LookupTables.dat", std::ios::binary | std::ios::in);
 
     // Just a cheecky check to se if everything is as it should be
@@ -262,59 +228,115 @@ std::array<std::map<int, ULL>, 64> load_lookup_tables() {
     return tables;
 }
 
+/// @brief
+/// find legal moves for a rook
+/// @return
+/// ULL mask of legal moves
 ULL find_rook_legal_moves(int position, ULL blockers) {
     ULL legal_moves = 0;
 
     // check left starting from position
     int cur_position = position;
-    int row = cur_position / 8;
-    int col = cur_position % 8;
 
     cur_position = position - 1;
-    while (cur_position%8 != 7) {
+    while (cur_position%8 != 7 && cur_position > 0) {
+        legal_moves |= (1ul << cur_position);
         if (blockers & (1ul << cur_position) != 0)
             break;
-
-        legal_moves |= (1ul << cur_position);
         cur_position -= 1;
 
     }
 
     // check right starting from position
     cur_position = position + 1;
-    while (cur_position%8 != 0) {
+    while (cur_position%8 != 0 && cur_position < 64) {
+        legal_moves |= (1ul << cur_position);
         if (blockers & (1ul << cur_position) != 0)
             break;
-
-        legal_moves |= (1ul << cur_position);
         cur_position += 1;
     }
 
     // moving up
     cur_position = position - 8;
     while (cur_position > 0) {
+        legal_moves |= (1ul << cur_position);
         if (blockers & (1ul << cur_position) != 0)
             break;
-        legal_moves |= (1ul << cur_position);
         cur_position -= 8;
     }
     // moving down
     cur_position = position + 8;
     while (cur_position < 64) {
+        legal_moves |= (1ul << cur_position);
         if (blockers & (1ul << cur_position) != 0)
             break;
-        legal_moves |= (1ul << cur_position);
         cur_position += 8;
     }
     return legal_moves;
 }
+
 /// @brief
+/// find legal moves for bishop
+/// @return
+/// ULL mask of legal moves
+ULL find_bishop_legal_moves(int position, ULL blockers) {
+    ULL legal_moves = 0;
+
+    // check left starting from position
+    int distanceLeft = 7 - position % 8;
+    int distanceRight = position % 8;
+    int distanceTop = 7 - position / 8;
+    int distanceBot = position / 8;
+
+    //bottom right
+    for (int j = 1; j <= std::min(distanceLeft, distanceTop); j++)
+    {
+        legal_moves |= (1ul << (position + 9 * j));
+        if (blockers & (1ul << position) != 0)
+            break;
+    }
+    // top right
+    for (int j = 1; j <= std::min(distanceLeft, distanceBot); j++)
+    {
+        legal_moves |= (1ul << (position + -7 * j));
+        if (blockers & (1ul << position) != 0)
+            break;
+    }
+    //top left
+    for (int j = 1; j <= std::min(distanceBot, distanceRight); j++)
+    {
+        legal_moves |= (1ul << (position + -9 * j));
+        if (blockers & (1ul << position) != 0)
+            break;
+    }
+    //bottom left
+    for (int j = 1; j <= std::min(distanceTop, distanceRight); j++)
+    {
+        legal_moves |= (1ul << (position + 7 * j));
+        if (blockers & (1ul << position) != 0)
+            break;
+    }
+    return legal_moves;
+}
+
+
+/// @brief
+/// find legal moves for queen
+/// @return
+/// ULL mask of legal moves
+ULL find_queen_legal_moves(int position, ULL blockers) {
+    ULL rook_legal_moves = blockerTable[position][r][blockers & lookupTable[position][r]];
+    ULL bishop_legal_moves = blockerTable[position][b][blockers & lookupTable[position][b]];
+    return  rook_legal_moves | bishop_legal_moves;
+}
+
+/// @brief`
 /// Given a movement map, return all possible blocker positions
 /// @return
-/// map with all possible blocker positions
-std::map<ULL, ULL> generate_blocker_map(int position, ULL movement_map, ULL (*find_legal_moves)(int,ULL) ) {
+/// std::map<ULL, ULL>, map with all possible blocker positions key is blocker mask, value is possible moves
+std::unordered_map<ULL, ULL> generate_blocker_map(int position, ULL movement_map, ULL (*find_legal_moves)(int,ULL) ) {
     std::vector<ULL> movement_indices;
-    std::map<ULL,ULL> blocker_to_legal_moves = std::map<ULL, ULL>();
+    std::unordered_map<ULL,ULL> blocker_to_legal_moves = std::unordered_map<ULL, ULL>();
     for (int i = 0; i < 64; i++) {
         ULL t = movement_map & (1ull << i) ;
         if ((movement_map & (1ull << i)) != 0){
@@ -326,18 +348,34 @@ std::map<ULL, ULL> generate_blocker_map(int position, ULL movement_map, ULL (*fi
 
     for (int i = 0; i < number_of_possibilities; i++) {
         ULL blocker_map = 0;
+        // std::cout << "runn" << std::endl;
         for (int j = 0; j < movement_indices.size(); j++) {
             if ((movement_map & (1ull << j)) != 0) {
                 blocker_map |= (1ull << movement_indices[j]);
             }
             // print_bit_board(blocker_map);
-            blocker_to_legal_moves.insert({blocker_map,find_legal_moves(position, blocker_map)});
+            blocker_to_legal_moves[blocker_map] = find_legal_moves(position, blocker_map);
             // print_bit_board(blocker_to_legal_moves[blocker_map]);
         }
     }
     return blocker_to_legal_moves;
 }
 
+/// @brief
+/// Generate all blocker tables, for rook and bishop, to be used during legal move generation
+/// @return
+/// std::array<std::map<int, std::map<ULL,ULL>>, 64> blocker lookup table
+std::array<std::unordered_map<int, std::unordered_map<ULL,ULL>>, 64>blocker_lookup_table( std::array<std::map<int, ULL>, 64> movement_lookup_table) {
+    std::array<std::unordered_map<int, std::unordered_map<ULL,ULL>>, 64> table;
+    for (int i = 0; i < 64; i++) {
+        std::cout << i << std::endl;
+        table[i][r] = generate_blocker_map(i,movement_lookup_table[i][r],find_rook_legal_moves);
+        table[i][b] = generate_blocker_map(i,movement_lookup_table[i][b],find_bishop_legal_moves);
+        // noticed this was really slow guessing it has to do with
+    }
+
+    return table;
+}
 
 
 
@@ -348,4 +386,51 @@ std::map<ULL, ULL> generate_blocker_map(int position, ULL movement_map, ULL (*fi
 bool validate_lookup_table(){
 
     return true;
+}
+
+
+std::list<move> get_legal_moves(Board board){
+
+    std::list<move> whiteMoves;
+    std::list<move> blackMoves;
+
+    // make sure the lookup table is assigned
+    // (dont worry map.empty() is O(1) so this is fine for repeated use)
+    if (lookupTable[0].empty())
+    {
+        lookupTable = load_lookup_tables();
+    }
+    //index of specific bitboards: 0 = black; 1 = p; 2 = r; 3 = n; 4 = b; 5 = q; 6 = k; 7 = white; 8 = p; 9 = r; 10 = n; 11 = b; 12 = q; 13 = k;
+    std::array<ULL,64> pseduo_legal_moves = std::array<ULL,64>();
+    std::array<ULL,64> takes_legal_moves= std::array<ULL,64>();
+    for(int i = 0; i <= 63; i++)
+    {
+        int pieceType = pointToIdx[board.letterbox[i]];
+
+        ULL takes, blockers;
+        blockers = board.bitboards[white] & board.bitboards[black];
+
+        // should give all moves, just need to classify some as takes, and make sure it doesn't put the king in danger
+        if (blockerTable[i].find(pieceType) != 0)
+            pseduo_legal_moves[i] = blockerTable[i][pieceType][lookupTable[i][pieceType] & blockers];
+        else if (pieceType == Q || pieceType == q)
+            pseduo_legal_moves[i] = find_queen_legal_moves(i,lookupTable[i][pieceType] & blockers);
+        else
+            pseduo_legal_moves[i] = lookupTable[i][pieceType];
+        if(pieceType < white)
+        {
+            takes = pseduo_legal_moves[i] & board.bitboards[white];
+        }
+        else{
+            takes = pseduo_legal_moves[i] & board.bitboards[black];
+        }
+        blockers = pseduo_legal_moves[i] & (board.bitboards[white] | board.bitboards[black]);
+        takes_legal_moves[i] =0;
+
+    }
+
+
+
+    // STILL NEEDS TO BE IMPLEMENTED
+    return whiteMoves;
 }
