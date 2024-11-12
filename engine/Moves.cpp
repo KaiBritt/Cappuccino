@@ -4,6 +4,10 @@
 
 #include "Headers/Global.hpp"
 #include "Headers/Moves.hpp"
+
+#include <random>
+#include <vector>
+
 #include "Headers/Board.hpp"
 
 std::array<std::map<int, ULL>, 64> lookupTable;
@@ -20,11 +24,27 @@ std::list<move> get_legal_moves(Board board){
         lookupTable = load_lookup_tables();
     }
     //index of specific bitboards: 0 = black; 1 = p; 2 = r; 3 = n; 4 = b; 5 = q; 6 = k; 7 = white; 8 = p; 9 = r; 10 = n; 11 = b; 12 = q; 13 = k;
-
-    for(int i = 0; i <= 63; i++){
-        int pieceType = board.letterbox[i];
+    std::array<ULL,64> pseduo_legal_moves = std::array<ULL,64>();
+    std::array<ULL,64> takes_legal_moves= std::array<ULL,64>();
+    for(int i = 0; i <= 63; i++)
+    {
+        int pieceType = pointToIdx[board.letterbox[i]];
+        //
+        pseduo_legal_moves[i] = lookupTable[pieceType][i];
+        ULL takes, occupied;
+        if(pieceType < white)
+        {
+            takes = pseduo_legal_moves[i] & board.bitboards[white];
+        }
+        else{
+            takes = pseduo_legal_moves[i] & board.bitboards[black];
+        }
+        occupied = pseduo_legal_moves[i] & (board.bitboards[white] | board.bitboards[black]);
+        takes_legal_moves[i] =0;
 
     }
+
+
 
     // STILL NEEDS TO BE IMPLEMENTED
     return whiteMoves;
@@ -77,7 +97,7 @@ std::array<std::map<int, ULL>, 64> generate_lookup_table(){
         }
 
         possibleMoves &= ~(1ul << i);
-        lookupTable[i].insert({r, possibleMoves});
+        lookupTable[63-i].insert({r, possibleMoves});
 
     // then bishop
         possibleMoves = 0;
@@ -100,7 +120,7 @@ std::array<std::map<int, ULL>, 64> generate_lookup_table(){
         }
 
         possibleMoves &= ~(1ul << i);
-        lookupTable[i].insert({b, possibleMoves});
+        lookupTable[63-i].insert({b, possibleMoves});
 
     // then knight
         possibleMoves = 0;
@@ -117,7 +137,7 @@ std::array<std::map<int, ULL>, 64> generate_lookup_table(){
         if(distanceBot >= 1 && distanceRight >= 2) possibleMoves |= (1ul << i + -10);
 
         possibleMoves &= ~(1ul << i);
-        lookupTable[i].insert({n, possibleMoves});
+        lookupTable[63-i].insert({n, possibleMoves});
 
     // then queen
         possibleMoves = 0;
@@ -152,7 +172,7 @@ std::array<std::map<int, ULL>, 64> generate_lookup_table(){
         }
 
         possibleMoves &= ~(1ul << i);
-        lookupTable[i].insert({q, possibleMoves});
+        lookupTable[63-i].insert({q, possibleMoves});
 
     // then king
         possibleMoves = 0;
@@ -168,9 +188,14 @@ std::array<std::map<int, ULL>, 64> generate_lookup_table(){
         if(distanceBot >= 1 && distanceRight >= 1) possibleMoves |= (1ul << i + -9);
 
         possibleMoves &= ~(1ul << i);
-        lookupTable[i].insert({k, possibleMoves});
+        lookupTable[63-i].insert({k, possibleMoves});
     }
 
+//adding blank spaces
+    for(int i = 0; i < 64; i++)
+    {
+        lookupTable[i].insert({0, 0});
+    }
     return lookupTable;
 }
 
@@ -236,6 +261,85 @@ std::array<std::map<int, ULL>, 64> load_lookup_tables() {
 
     return tables;
 }
+
+ULL find_rook_legal_moves(int position, ULL blockers) {
+    ULL legal_moves = 0;
+
+    // check left starting from position
+    int cur_position = position;
+    int row = cur_position / 8;
+    int col = cur_position % 8;
+
+    cur_position = position - 1;
+    while (cur_position%8 != 7) {
+        if (blockers & (1ul << cur_position) != 0)
+            break;
+
+        legal_moves |= (1ul << cur_position);
+        cur_position -= 1;
+
+    }
+
+    // check right starting from position
+    cur_position = position + 1;
+    while (cur_position%8 != 0) {
+        if (blockers & (1ul << cur_position) != 0)
+            break;
+
+        legal_moves |= (1ul << cur_position);
+        cur_position += 1;
+    }
+
+    // moving up
+    cur_position = position - 8;
+    while (cur_position > 0) {
+        if (blockers & (1ul << cur_position) != 0)
+            break;
+        legal_moves |= (1ul << cur_position);
+        cur_position -= 8;
+    }
+    // moving down
+    cur_position = position + 8;
+    while (cur_position < 64) {
+        if (blockers & (1ul << cur_position) != 0)
+            break;
+        legal_moves |= (1ul << cur_position);
+        cur_position += 8;
+    }
+    return legal_moves;
+}
+/// @brief
+/// Given a movement map, return all possible blocker positions
+/// @return
+/// map with all possible blocker positions
+std::map<ULL, ULL> generate_blocker_map(int position, ULL movement_map, ULL (*find_legal_moves)(int,ULL) ) {
+    std::vector<ULL> movement_indices;
+    std::map<ULL,ULL> blocker_to_legal_moves = std::map<ULL, ULL>();
+    for (int i = 0; i < 64; i++) {
+        ULL t = movement_map & (1ull << i) ;
+        if ((movement_map & (1ull << i)) != 0){
+            movement_indices.push_back(i);
+        }
+    }
+    //calculating size of the map
+    ULL number_of_possibilities = static_cast<unsigned long long>(std::pow(2, movement_indices.size()));
+
+    for (int i = 0; i < number_of_possibilities; i++) {
+        ULL blocker_map = 0;
+        for (int j = 0; j < movement_indices.size(); j++) {
+            if ((movement_map & (1ull << j)) != 0) {
+                blocker_map |= (1ull << movement_indices[j]);
+            }
+            // print_bit_board(blocker_map);
+            blocker_to_legal_moves.insert({blocker_map,find_legal_moves(position, blocker_map)});
+            // print_bit_board(blocker_to_legal_moves[blocker_map]);
+        }
+    }
+    return blocker_to_legal_moves;
+}
+
+
+
 
 /// @brief 
 /// UNIMPLEMENTED

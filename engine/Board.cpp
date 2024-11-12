@@ -4,6 +4,8 @@
 
 #include "./Headers/Board.hpp"
 
+#include <optional>
+
 
 void print_bit_board(unsigned long long bitboard) {
     for (int row = 0; row < 8; row++) {
@@ -21,7 +23,7 @@ void print_bit_board(unsigned long long bitboard) {
 }
 
 
-Board::Board(char * FEN) {
+Board::Board(const char * FEN) {
     //making bitboards first
     for (unsigned long long & bitboard : bitboards) {
         bitboard = 0;
@@ -55,9 +57,8 @@ Board::Board(char * FEN) {
         bitboards[m['W']] |= bitboards[m['W'] + i];
      }
 
-    //making human readable board #from bb
+    //making evaluation-readable
     char charMap[15] = "DprnbqkWPRNBQK";
-    std::map<char,int> charToPoint{{'D',0},{'p',-100},{'r',-500},{'n',-300},{'b',-320},{'q',-900},{'k',-20000},{'W',0},{'P',100},{'R',500},{'N',300},{'B',320},{'Q',900},{'K',20000}};
     for (int & val : letterbox) {
         val = 0;
     }
