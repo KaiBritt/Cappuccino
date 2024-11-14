@@ -3,13 +3,13 @@
 //
 
 #include "Headers/Global.hpp"
+#include "Headers/Board.hpp"
 #include "Headers/Moves.hpp"
 
 #include <random>
 #include <unordered_map>
 #include <vector>
 
-#include "Headers/Board.hpp"
 
 //typedefing common types
 using BlockerTableArray = std::array<std::unordered_map<int, std::unordered_map<ULL,ULL>>, 64>;
@@ -172,7 +172,7 @@ LookupTableArray generate_lookup_table(){
 /// Stores tables lookups table into a LookupTables.dat file in binary format
 /// @param tables 
 /// the table we want to push into LookupTables.dat
-void store_lookup_tables(LookupTableArray tables){
+void store_lookup_tables(const LookupTableArray& tables){
     // Create a file to write into
     std::ofstream ofs("LookupTables.dat", std::ios::binary | std::ios::out);
 
@@ -231,6 +231,58 @@ LookupTableArray load_lookup_tables() {
     return tables;
 }
 
+
+void store_blocker_table(const BlockerTableArray& blocker_table) {
+    std::ofstream ofs("BlockerTable.dat", std::ios::binary | std::ios::out);
+
+    if (!ofs) {
+        std::cerr << "Error opening file for writing: LookupTables.dat" << std::endl;
+        return;
+    }
+    for (auto& piece_map : blocker_table) {
+        size_t map_size = piece_map.size();
+        ofs.write(reinterpret_cast<const char *> (&map_size), sizeof(map_size));
+        for (auto& blocker_map : piece_map) {
+            size_t inner_map_size = blocker_map.second.size();
+            ofs.write(reinterpret_cast<const char *> (&inner_map_size), sizeof(inner_map_size));
+            ofs.write(reinterpret_cast<const char *> (&blocker_map.first), sizeof(blocker_map.first));
+            for (auto& blocker : blocker_map.second) {
+                ofs.write(reinterpret_cast<const char *> (&blocker.first), sizeof(blocker.second));
+                ofs.write(reinterpret_cast<const char *> (&blocker.second), sizeof(blocker.second));
+            }
+        }
+    }
+    std::cout << "ran\n";
+    ofs.close();
+}
+
+BlockerTableArray load_blocker_table() {
+    BlockerTableArray blocker_table;
+    std::ifstream ifs("BlockerTable.dat", std::ios::binary | std::ios::in);
+    if (!ifs) {
+        std::cerr << "Error opening file for reading: BlockerTable.dat" << std::endl;
+    }
+    for (auto& piece_map : blocker_table) {
+        size_t map_size;
+        ifs.read(reinterpret_cast<char *> (&map_size), sizeof(map_size));
+        for (int i = 0; i < map_size; i++) {
+            size_t inner_map_size;
+            std::unordered_map<ULL,ULL> blocker_map;
+            ifs.read(reinterpret_cast<char *> (&inner_map_size), sizeof(inner_map_size));
+            int piece_key;
+            ifs.read(reinterpret_cast<char *> (&piece_key), sizeof(piece_key));
+            for (int j = 0; j < inner_map_size; j++) {
+                ULL inner_key;
+                ULL inner_value;
+                ifs.read(reinterpret_cast<char *> (&inner_key), sizeof(inner_key));
+                ifs.read(reinterpret_cast<char *>(&inner_value), sizeof(inner_value));
+                blocker_map[inner_key] = inner_value;
+            }
+            piece_map[piece_key] = blocker_map;
+        }
+    }
+    return blocker_table;
+}
 /// @brief
 /// find legal moves for a rook
 /// @return
@@ -393,33 +445,33 @@ bool validate_lookup_table(){
 }
 
 
-std::list<move> get_legal_moves(Board board){
+std::list<Move> get_legal_moves(Board * board){
 
-    std::list<move> whiteMoves;
-    std::list<move> blackMoves;
+    std::list<Move> whiteMoves;
+    std::list<Move> blackMoves;
 
     // make sure the lookup table is assigned
     // (dont worry map.empty() is O(1) so this is fine for repeated use)
     if (lookupTable[0].empty())
     {
         lookupTable = load_lookup_tables();
-        blockerTable = generate_blocker_table(lookupTable);
+        blockerTable = load_blocker_table();
     }
     //index of specific bitboards: 0 = black; 1 = p; 2 = r; 3 = n; 4 = b; 5 = q; 6 = k; 7 = white; 8 = p; 9 = r; 10 = n; 11 = b; 12 = q; 13 = k;
     std::array<ULL,64> pseduo_legal_moves = std::array<ULL,64>();
     std::array<ULL,64> takes_legal_moves= std::array<ULL,64>();
     for(int i = 0; i <= 63; i++)
     {
-        const PieceType pieceType = pointToPiece[board.letterbox[i]];
+        const PieceType pieceType = pointToPiece[board->letterbox[i]];
 
         ULL takes, blockers;
-        blockers = board.bitboards[white] | board.bitboards[black];
+        blockers = board->bitboards[white] | board->bitboards[black];
 
         // should give all moves, just need to classify some as takes, and make sure it doesn't put the king in danger
         if (blockerTable[i].find(pieceType%7) != nullptr) // 7 is difference between r and R in our enum
             pseduo_legal_moves[i] = blockerTable[i][pieceType%7][lookupTable[i][pieceType%7] & blockers];
 
-        else if (pieceType == Q || pieceType == q)
+        else if (pieceType%7 == q)
             pseduo_legal_moves[i] = find_queen_legal_moves(i,lookupTable[i][pieceType] & blockers);
 
         else
@@ -427,28 +479,40 @@ std::list<move> get_legal_moves(Board board){
 
         // current piece is black
         if(pieceType < white && pieceType != black) {
-            pseduo_legal_moves[i] = pseduo_legal_moves[i] & ~(board.bitboards[black]);
-            takes = pseduo_legal_moves[i] & board.bitboards[white];
+            // removing friendly pieces
+            pseduo_legal_moves[i] = pseduo_legal_moves[i] & ~(board->bitboards[black]);
+            takes = pseduo_legal_moves[i] & board->bitboards[white];
 
             for (int j = 0; j < 64; j++) {
                 if ((takes & (1ull << j)) != 0) {
-                    blackMoves.push_back((move) {i, j, false,false, pointToPiece[board.letterbox[63-j]]});
+                    blackMoves.push_back((Move) {i, j, false,false, pointToPiece[board->letterbox[63-j]]});
                 }
                 else if ((pseduo_legal_moves[i]  & (1ull << j)) != 0) {
-                    blackMoves.push_back((move) {i, j, false,false, pointToPiece[black]});
+                    blackMoves.push_back((Move) {i, j, false,false, pointToPiece[black]});
                 }
             }
         }
 
         // current piece is white
         else if (pieceType > white) {
-            takes = pseduo_legal_moves[i] & board.bitboards[black];
+            // removing friendly pieces
+            pseduo_legal_moves[i] = pseduo_legal_moves[i] & ~(board->bitboards[white]);
+            takes = pseduo_legal_moves[i] & board->bitboards[black];
+
+            for (int j = 0; j < 64; j++) {
+                if ((takes & (1ull << j)) != 0) {
+                    whiteMoves.push_back((Move) {i, j, false,false, pointToPiece[board->letterbox[63-j]]});
+                }
+                else if ((pseduo_legal_moves[i]  & (1ull << j)) != 0) {
+                    whiteMoves.push_back((Move) {i, j, false,false, pointToPiece[black]});
+                }
+            }
         }
 
-        blockers = pseduo_legal_moves[i] & (board.bitboards[white] | board.bitboards[black]);
+        blockers = pseduo_legal_moves[i] & (board->bitboards[white] | board->bitboards[black]);
 
 
-        takes_legal_moves[i] =0;
+        takes_legal_moves[i] = 0;
 
     }
 
