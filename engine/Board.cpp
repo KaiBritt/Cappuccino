@@ -85,3 +85,32 @@ Board::Board(const char * FEN) {
 
 }
 
+std::string Board::export_FEN() {
+    std::string FEN = "";
+    for (int row = 0; row < 8; row++) {
+        int space_count = 0;
+        for (int col = 0; col < 8; col++) {
+            if (letterbox[row*8 + col] == 0) {
+                space_count += 1;
+            }
+            else {
+                if (space_count > 0) {
+                    FEN += std::to_string(space_count);
+                    space_count = 0;
+                }
+                FEN += pointToChar[letterbox[row*8 + col]];
+            }
+        }
+        if (space_count != 0) {
+            FEN += std::to_string(space_count);
+        }
+
+        if (row < 7) {
+            FEN += "/";
+        }
+    }
+
+    return FEN;
+}
+
+

@@ -13,6 +13,7 @@ int main()
     // std::array<std::unordered_map<int, std::unordered_map<unsigned long long, unsigned long long>>, 64> blockers = generate_blocker_table(tables);
     // store_blocker_table(blockers);
     Board test_board = Board("8/4p3/8/2P1q1p1/5P2/4P3/8/8");
+    std::cout << test_board.export_FEN() << std::endl;
     // print_letterbox(test_board.letterbox);
     get_legal_moves( &test_board);
     std::cout << "finished "  <<std::endl;

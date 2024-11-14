@@ -14,6 +14,7 @@ class Board
 {
 public:
     explicit Board(const char * FEN);
+    std::string export_FEN();
     unsigned long long bitboards[14]; //index of specific bitboards: 0 = black; 1 = p; 2 = r; 3 = n; 4 = b; 5 = q; 6 = k; 7 = white; 8 = p; 9 = r; 10 = n; 11 = b; 12 = q; 13 = k;
     std::array<int,64> letterbox;
     // std::vector<move> game_moves;
