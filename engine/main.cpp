@@ -1,7 +1,19 @@
 #include <iostream>
+#include "Headers/Moves.hpp"
+#include "Headers/Global.hpp"
+#include "Headers/Board.hpp"
 
 int main()
 {
-    std::cout << "Hello, World!" << std::endl;
+    std::array<std::unordered_map<int, ULL>, 64> tables = generate_lookup_table();
+    // store_lookup_tables(tables);
+    // std::array<std::map<int, ULL>, 64> tables  = load_lookup_tables();
+    // print_bit_board(2251808403619840 & (1ull << 63-12));
+    std::cout << std::endl;
+    // generate_blocker_map(0,tables[0][PieceType::r],find_rook_legal_moves);
+    generate_blocker_table(tables);
+    Board test_board = Board("8/4p3/8/2P1q1p1/5P2/4P3/8/8");
+    print_letterbox(test_board.letterbox);
+    get_legal_moves(test_board);
     return 0;
 }

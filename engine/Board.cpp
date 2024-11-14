@@ -20,6 +20,17 @@ void print_bit_board(unsigned long long bitboard) {
         }
         printf("\n");
     }
+    printf("\n");
+
+}
+
+void print_letterbox(const std::array<int,64>& letterbox) {
+    for (int row = 0; row < 8; row++) {
+        for (int col = 0; col < 8; col++) {
+          printf("%d ", pointToPiece[letterbox[row*8 + col]]);
+        }
+        printf("\n");
+    }
 }
 
 
@@ -42,7 +53,7 @@ Board::Board(const char * FEN) {
                 col = 0;
             }
             else if ((1 <= (FEN[cc] - '0')) and ((FEN[cc] -'0') <= 9)){
-                col += (FEN[cc] - '0') - 1;
+                col += (FEN[cc] - '0');
             }
             else {
                 int offset = row * 8 + col;
