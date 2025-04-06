@@ -5,7 +5,8 @@
 
 int main()
 {
-    std::array<std::unordered_map<int, ULL>, 64> tables = generate_lookup_table();
+    LookupTableArray lookup_table = generate_lookup_table();
+    BlockerTableArray blocker_table = generate_blocker_table(lookup_table);
     // store_lookup_tables(tables);
     // std::array<std::map<int, ULL>, 64> tables  = load_lookup_tables();
     std::cout << std::endl;

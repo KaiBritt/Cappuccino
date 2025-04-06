@@ -24,6 +24,7 @@ public:
 
 private:
     std::map<char,int> m{{'D', 0}, {'p', 1}, {'r', 2}, {'n', 3}, {'b', 4}, {'q', 5}, {'k', 6}, {'W', 7}, {'P', 8}, {'R', 9}, {'N', 10}, {'B', 11}, {'Q', 12}, {'K', 13}};
+
 };
 
 void print_bit_board(unsigned long long bitboard);

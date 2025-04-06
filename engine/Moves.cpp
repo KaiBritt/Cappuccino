@@ -19,7 +19,7 @@ using LookupTableArray = std::array<std::unordered_map<int, ULL>, 64>;
 LookupTableArray lookupTable;
 BlockerTableArray blockerTable;
 
-/// @brief 
+/// @brief
 /// If LookupTables.dat exists use load_lookup_tables instead
 /// @return 
 /// Returns array of maps with lookup tables
@@ -165,6 +165,8 @@ LookupTableArray generate_lookup_table(){
     {
         lookupTable[i].insert({0, 0});
     }
+
+    store_lookup_tables(lookupTable);
     return lookupTable;
 }
 
@@ -182,7 +184,7 @@ void store_lookup_tables(const LookupTableArray& tables){
         return;
     }
 
-    // Convert everything into binary and write it out like a good boy
+    // Convert everything into binary and write it out
     for (const auto& mapElement : tables) {
         size_t mapSize = mapElement.size();
         ofs.write(reinterpret_cast<const char*>(&mapSize), sizeof(mapSize));
@@ -232,7 +234,7 @@ LookupTableArray load_lookup_tables() {
 }
 
 
-void store_blocker_table(const BlockerTableArray& blocker_table) {
+void store_blocker_tables(const BlockerTableArray& blocker_table) {
     std::ofstream ofs("BlockerTable.dat", std::ios::binary | std::ios::out);
 
     if (!ofs) {
@@ -386,7 +388,7 @@ ULL find_queen_legal_moves(int position, ULL blockers) {
     return  rook_legal_moves | bishop_legal_moves;
 }
 
-/// @brief`
+/// @brief
 /// Given a movement map, return all possible blocker positions
 /// @return
 /// std::map<ULL, ULL>, map with all possible blocker positions key is blocker mask, value is possible moves
@@ -414,6 +416,7 @@ std::unordered_map<ULL, ULL> generate_blocker_map(int position, ULL movement_map
             // print_bit_board(blocker_to_legal_moves[blocker_map]);
         }
     }
+
     return blocker_to_legal_moves;
 }
 
@@ -421,7 +424,7 @@ std::unordered_map<ULL, ULL> generate_blocker_map(int position, ULL movement_map
 /// Generate all blocker tables, for rook and bishop, to be used during legal move generation
 /// @return
 /// std::array<std::map<int, std::map<ULL,ULL>>, 64> blocker lookup table
-BlockerTableArray generate_blocker_table(LookupTableArray movement_lookup_table) {
+BlockerTableArray generate_blocker_table(LookupTableArray& movement_lookup_table) {
     BlockerTableArray table;
     for (int i = 0; i < 64; i++) {
         // std::cout << i << std::endl;
@@ -429,7 +432,7 @@ BlockerTableArray generate_blocker_table(LookupTableArray movement_lookup_table)
         table[i][b] = generate_blocker_map(63-i,movement_lookup_table[i][b],find_bishop_legal_moves);
         // noticed this was really slow guessing it has to do with
     }
-
+    store_blocker_tables(table);
     return table;
 }
 

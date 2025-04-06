@@ -6,7 +6,10 @@
 
 #include <optional>
 
-
+/**
+* @brief given ull print binary in rows of 8
+* @param bitboard number to print
+*/
 void print_bit_board(unsigned long long bitboard) {
     for (int row = 0; row < 8; row++) {
         for (int col = 0; col < 8; col++) {
@@ -24,6 +27,10 @@ void print_bit_board(unsigned long long bitboard) {
 
 }
 
+/**
+* @brief display letter box board
+* @param letter box
+**/
 void print_letterbox(const std::array<int,64>& letterbox) {
     for (int row = 0; row < 8; row++) {
         for (int col = 0; col < 8; col++) {
@@ -33,7 +40,9 @@ void print_letterbox(const std::array<int,64>& letterbox) {
     }
 }
 
-
+/*
+* @brief given Forsyth-Edwards Notation (FEN) construct a board
+*/
 Board::Board(const char * FEN) {
     //making bitboards first
     for (unsigned long long & bitboard : bitboards) {

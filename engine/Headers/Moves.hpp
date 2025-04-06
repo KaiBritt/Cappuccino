@@ -5,6 +5,7 @@
 #ifndef MOVES_HPP
 #define MOVES_HPP
 #define ULL unsigned long long
+
 #define PAWN 100
 #define KNIGHT 300
 #define BISHOP 320
@@ -21,6 +22,8 @@
 
 class Board;
 
+using BlockerTableArray = std::array<std::unordered_map<int, std::unordered_map<ULL,ULL>>, 64>;
+using LookupTableArray = std::array<std::unordered_map<int, ULL>, 64>;
 
 typedef struct{
     // uses letterbox
@@ -40,9 +43,9 @@ std::array<std::unordered_map<int, ULL>, 64> generate_lookup_table();
 
 ULL find_rook_legal_moves(int position, ULL blockers) ;
 std::unordered_map<ULL, ULL> generate_blocker_map(int position, ULL movement_map, ULL (*find_legal_moves)(int,ULL) );
-std::array<std::unordered_map<int, std::unordered_map<ULL,ULL>>, 64>generate_blocker_table( std::array<std::unordered_map<int, ULL>, 64> movement_lookup_table);
+std::array<std::unordered_map<int, std::unordered_map<ULL,ULL>>, 64>generate_blocker_table( std::array<std::unordered_map<int, ULL>, 64> & movement_lookup_table);
 void store_lookup_tables(const std::array<std::unordered_map<int, ULL>, 64>& tables);
-void store_blocker_table(const std::array<std::unordered_map<int, std::unordered_map<unsigned long long, unsigned long long>>, 64> & blocker_table);
+void store_blocker_tables(const std::array<std::unordered_map<int, std::unordered_map<unsigned long long, unsigned long long>>, 64> & blocker_table);
 std::array<std::unordered_map<int, ULL>, 64> load_lookup_tables();
 
 std::string md5(const std::string &str);
