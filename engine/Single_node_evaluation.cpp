@@ -2,7 +2,7 @@
 // Created by cinna on 06/08/24.
 //
 
-#include "Headers/single_node_evaluation.hpp"
+#include "Headers/Single_node_evaluation.hpp"
 
 /// @brief uses binary XOR to flip the square index vertically (e.g. turn a1 into a8)
 /// @return int : vertically flipped index
