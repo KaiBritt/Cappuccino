@@ -2,9 +2,9 @@
 // Created by cinna on 06/08/24.
 //
 
-#include "Headers/Single_node_evaluation.hpp"
+#include "../include/Single_node_evaluation.hpp"
 // #include "voronoi.h"
-#include "Headers/Board.hpp"
+#include "../include/Board.hpp"
 /// @brief uses binary XOR to flip the square index vertically (e.g. turn a1 into a8)
 /// @return int : vertically flipped index
 int flip_square(int index) {

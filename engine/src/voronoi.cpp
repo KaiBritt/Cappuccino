@@ -1,6 +1,7 @@
 
-#include "voronoi.h"
+#include "../include/voronoi.h"
 #include <CGAL/draw_voronoi_diagram_2.h>
+
 void graphFromBitboard(std::vector<ColoredPoint>& points, unsigned long long bitboard, int color) {
   unsigned long long anchor = 1ull << 63;
   for (int i = 0; i < 64; i++) {

@@ -2,10 +2,10 @@
 // Created by kai on 8/6/24.
 //
 
-#include "./Headers/Board.hpp"
+#include "../include/Board.hpp"
 
 #include <optional>
-#include <CGAL/Sqrt_extension/Sqrt_extension_type.h>
+// #include <CGAL/Sqrt_extension/Sqrt_extension_type.h>
 
 /**
 * @brief given ull print binary in rows of 8

@@ -2,9 +2,9 @@
 // Created by elmo on 07/08/24.
 //
 
-#include "Headers/Global.hpp"
-#include "Headers/Board.hpp"
-#include "Headers/Moves.hpp"
+#include "../include/Global.hpp"
+#include "../include/Board.hpp"
+#include "../include/Moves.hpp"
 
 #include <random>
 #include <unordered_map>

@@ -1,11 +1,11 @@
 #include <iostream>
 
 // #include "voronoi.h"
-#include "Headers/Moves.hpp"
-#include "Headers/Global.hpp"
-#include "Headers/Board.hpp"
-#include "Headers/Single_node_evaluation.hpp"
-#include "Headers/minimax.h"
+#include "../include/Moves.hpp"
+#include "../include/Global.hpp"
+#include "../include/Board.hpp"
+#include "../include/Single_node_evaluation.hpp"
+#include "../include/minimax.h"
 int main()
 {
     LookupTableArray lookup_table = generate_lookup_table();
@@ -38,6 +38,6 @@ int main()
     std::cout << evaluate_node(test_board.letterbox)<< std::endl;
     print_letterbox(test_board.letterbox);
     std::cout << "finished "  <<std::endl;
-    std::cout << posToAlg(0) << std::endl;
+    std::cout << posToAlg(best_move.startPos) << posToAlg(best_move.endPos) << std::endl;
     return 0;
 }

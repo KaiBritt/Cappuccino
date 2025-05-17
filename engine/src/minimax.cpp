@@ -2,8 +2,8 @@
 // Created by kai on 5/14/25.
 //
 
-#include "Headers/minimax.h"
-#include "Headers/Single_node_evaluation.hpp"
+#include "../include/minimax.h"
+#include "../include/Single_node_evaluation.hpp"
 
 
 int minimax(Board& board, int depth, int alpha, int beta, bool maximizingPlayer) {
