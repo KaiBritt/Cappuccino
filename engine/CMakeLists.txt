@@ -17,6 +17,8 @@ add_executable(engine
 #        voronoi.h
         src/minimax.cpp
         include/minimax.h
+        src/UCI.cpp
+        include/UCI.hpp
 )
 
 #add_executable(voronoibb voronoiStandalone.cpp voronoi.h)
