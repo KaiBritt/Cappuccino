@@ -10,7 +10,6 @@
 #include <unordered_map>
 #include <vector>
 
-
 //typedefing common types
 using BlockerTableArray = std::array<std::unordered_map<int, std::unordered_map<ULL,ULL>>, 64>;
 using LookupTableArray = std::array<std::unordered_map<int, ULL>, 64>;
@@ -19,43 +18,53 @@ using LookupTableArray = std::array<std::unordered_map<int, ULL>, 64>;
 LookupTableArray lookupTable;
 BlockerTableArray blockerTable;
 
+
+int algToPos(const std::string& alg) {
+    int file = alg[0] - 'a';
+    int rank = '8' - alg[1];
+    return rank * 8 + file;              // top-down row-major
+}
+
+
 /// @brief
 /// If LookupTables.dat exists use load_lookup_tables instead
 /// @return 
 /// Returns array of maps with lookup tables
 LookupTableArray generate_lookup_table(){
-    LookupTableArray lookupTable;
 
     for(int i = 0; i < 64; i++)
     {
 
-        int distanceLeft = 7 - i % 8;
-        int distanceRight = i % 8;
-        int distanceTop = 7 - i / 8;
-        int distanceBot = i / 8;
+        int distanceRight = 7 - i % 8;
+        int distanceLeft = i % 8;
+        int distanceBot = 7 - i / 8;
+        int distanceTop = i / 8;
 
-        // Start with pawns Black
+        // Start with pawns White
         ULL possibleMoves = 0;
 
-        if(distanceTop >= 2) possibleMoves += (1ul << (i + 16));
-        if(distanceTop >= 1) possibleMoves += (1ul << (i + 8));
-        if(distanceTop >= 1 && distanceLeft >= 1) possibleMoves += (1ul << (i + 9));
-        if(distanceTop >= 1 && distanceRight >= 1) possibleMoves += (1ul << (i + 7));
+        if(distanceTop >= 1) {
+            possibleMoves += (1ul << (63-i + 8));
+            if(distanceBot == 1) possibleMoves += (1ul << (63-i + 16));
+            if(distanceLeft >= 1) possibleMoves += (1ul << (63-i + 9));
+            if(distanceRight >= 1) possibleMoves += (1ul << (63-i + 7));
+        }
 
-        lookupTable[63 - i].insert({p, possibleMoves});
+        lookupTable[i].insert({P, possibleMoves});
 
-        // Proceed with White pawns
+        // Proceed with Black pawns
 
         possibleMoves = 0;
+        if(distanceBot >= 1) {
+            possibleMoves += (1ul << (63-i - 8));
+            if(distanceTop == 1) possibleMoves += (1ul << (63-i - 16));
+            if(distanceLeft >= 1) possibleMoves += (1ul << (63-i - 7));
+            if(distanceRight >= 1) possibleMoves += (1ul << (63-i - 9));
+        }
 
-        if(distanceBot >= 2) possibleMoves += (1ul << (i - 16));
-        if(distanceBot >= 1) possibleMoves += (1ul << (i - 8));
-        if(distanceBot >= 1 && distanceLeft >= 1) possibleMoves += (1ul << (i - 9));
-        if(distanceBot >= 1 && distanceRight >= 1) possibleMoves += (1ul << (i - 7));
+        lookupTable[i].insert({p, possibleMoves});
 
-        lookupTable[63 - i].insert({P, possibleMoves});
-
-    // then rooks
+     // then rooks
         possibleMoves = 0;
         for (int j = 1; j < 9; j++)
         {
@@ -70,20 +79,20 @@ LookupTableArray generate_lookup_table(){
 
     // then bishop
         possibleMoves = 0;
-    
-        for (int j = 1; j <= std::min(distanceLeft, distanceTop); j++)
+
+        for (int j = 1; j <= std::min(distanceRight, distanceBot); j++)
         {
             possibleMoves |= (1ul << (i + 9 * j));
         }
-        for (int j = 1; j <= std::min(distanceLeft, distanceBot); j++)
+        for (int j = 1; j <= std::min(distanceRight, distanceTop); j++)
         {
         possibleMoves |= (1ul << (i + -7 * j));
         }
-        for (int j = 1; j <= std::min(distanceBot, distanceRight); j++)
+        for (int j = 1; j <= std::min(distanceTop, distanceLeft); j++)
         {
             possibleMoves |= (1ul << (i + -9 * j));
         }
-        for (int j = 1; j <= std::min(distanceTop, distanceRight); j++)
+        for (int j = 1; j <= std::min(distanceBot, distanceLeft); j++)
         {
             possibleMoves |= (1ul << (i + 7 * j));
         }
@@ -96,18 +105,18 @@ LookupTableArray generate_lookup_table(){
 
         int indexes[8] = {17, 15, 10, -6, -10, 6, -17, -15};
 
-        if(distanceTop >= 2 && distanceLeft >= 1) possibleMoves |= (1ul << i + 17);
-        if(distanceTop >= 2 && distanceRight >= 1) possibleMoves |= (1ul << i + 15);
-        if(distanceTop >= 1 && distanceLeft >= 2) possibleMoves |= (1ul << i + 10);
-        if(distanceTop >= 1 && distanceRight >= 2) possibleMoves |= (1ul << i + 6);
-        if(distanceBot >= 1 && distanceLeft >= 2) possibleMoves |= (1ul << i + -6);
-        if(distanceBot >= 2 && distanceLeft >= 1) possibleMoves |= (1ul << i + -15);
-        if(distanceBot >= 2 && distanceRight >= 1) possibleMoves |= (1ul << i + -17);
-        if(distanceBot >= 1 && distanceRight >= 2) possibleMoves |= (1ul << i + -10);
+        possibleMoves = 0;
 
-        possibleMoves &= ~(1ul << i);
+        if (distanceTop >= 2 && distanceRight >= 1) possibleMoves |= (1UL << (i - 15)); // up 2, right 1
+        if (distanceTop >= 2 && distanceLeft >= 1)  possibleMoves |= (1UL << (i - 17)); // up 2, left 1
+        if (distanceTop >= 1 && distanceRight >= 2) possibleMoves |= (1UL << (i - 6));  // up 1, right 2
+        if (distanceTop >= 1 && distanceLeft >= 2)  possibleMoves |= (1UL << (i - 10)); // up 1, left 2
+        if (distanceBot >= 1 && distanceRight >= 2) possibleMoves |= (1UL << (i + 10)); // down 1, right 2
+        if (distanceBot >= 1 && distanceLeft >= 2)  possibleMoves |= (1UL << (i + 6));  // down 1, left 2
+        if (distanceBot >= 2 && distanceRight >= 1) possibleMoves |= (1UL << (i + 17)); // down 2, right 1
+        if (distanceBot >= 2 && distanceLeft >= 1)  possibleMoves |= (1UL << (i + 15)); // down 2, left 1
+
         lookupTable[63-i].insert({n, possibleMoves});
-
     // then queen
         possibleMoves = 0;
         distanceLeft = 7 - i % 8;
@@ -159,7 +168,6 @@ LookupTableArray generate_lookup_table(){
         possibleMoves &= ~(1ul << i);
         lookupTable[63-i].insert({k, possibleMoves});
     }
-
 //adding blank spaces
     for(int i = 0; i < 64; i++)
     {
@@ -167,6 +175,7 @@ LookupTableArray generate_lookup_table(){
     }
 
     store_lookup_tables(lookupTable);
+
     return lookupTable;
 }
 
@@ -376,13 +385,90 @@ ULL find_bishop_legal_moves(int position, ULL blockers) {
     return legal_moves;
 }
 
+///@breif
+///find legal moves for pawn
+///@return
+///ULL mask of pawn legal moves
+ULL find_b_pawn_legal_moves(int position, ULL blockers) {
+        ULL takes;
+        int dir = 1;
+        ULL shift_amt = (position + 9*dir);
+        ULL moves = lookupTable[position][p];
+        ULL pseudo_legal_moves = lookupTable[position][p] & ~blockers;
+        // checking if there is a piece infront of the pawn
+        if (position < 56) { // only has moves if it's above th ebottom line
+            if ((blockers & canchor >> (position + 8*dir))!= 0) {
+             ULL shift=  position + 8*dir;
+               pseudo_legal_moves &= ~((canchor) >> shift);
+                if (position > 7 && position < 16 && blockers &  (canchor) >> (position  + 16*dir) != 0) {
+                    pseudo_legal_moves &= ~(canchor >> (position + 16*dir)); // remove the double move
+                }
+            }
+            //check left and right
+            if (position % 8 != 0) // can't capture left
+                if ((blockers & canchor >> (position + 7 * dir)) == 0) {
+                    pseudo_legal_moves &= ~(canchor >> (position + 7 * dir));
+                }
+            if (position %8 != 7) // cant capture right
+                if ((blockers & canchor >> (position + 9 * dir)) == 0) {
+                    pseudo_legal_moves &= ~(canchor >> (position + 9 * dir));
+                }
+        }
 
+        return pseudo_legal_moves;
+    }
+
+ULL find_w_pawn_legal_moves(int position, ULL blockers) {
+    if (position == 55);
+    ULL takes;
+    int dir = -1;
+    ULL shift_amt = (position + 9*dir);
+    ULL moves = lookupTable[position][P];
+    ULL pseudo_legal_moves = lookupTable[position][P];
+    // checking if there is a piece infront of the pawn
+    if (position > 7) { // only has moves if it's above th ebottom line
+        // if (blockers &  anchor >> (position  + 7*dir) != 0) {
+        //     pseudo_legal_moves |= anchor >> (position + 7*dir);
+        // }
+        // else {
+        //     pseudo_legal_moves &= ~(anchor >> (position + 7*dir));
+        // }
+        // if ((blockers &  (anchor) >> (position  + 9*dir)) != 0) {
+        //     ULL shift_amt = (position + 9*dir);
+        //     // std::cout << anchor << std::endl;
+        //     pseudo_legal_moves |= anchor >> shift_amt;
+        // }
+        // else {
+        //     pseudo_legal_moves &= ~(anchor >> (position + 9*dir));
+        // }
+
+        if ((blockers & canchor >> (position + 8*dir))!= 0) {
+            ULL shift=  position + 8*dir;
+            pseudo_legal_moves &= ~((canchor) >> shift);
+            if (position  < 56  && position > 47  && blockers &  (canchor) >> (position  + 16*dir) != 0) {
+                pseudo_legal_moves &= ~(canchor >> (position + 16*dir)); // remove the double move
+            }
+        }
+        //check left and right
+        if (position % 8 != 0) // can't capture left
+            if ((blockers & canchor >> (position + 7 * dir)) == 0) {
+                pseudo_legal_moves &= ~(canchor >> (position + 9 * dir));
+            }
+        if (position %8 != 7) // cant capture right
+            if ((blockers & canchor >> (position + 9 * dir)) == 0) {
+                pseudo_legal_moves &= ~(canchor >> (position + 7 * dir));
+            }
+
+    }
+    return pseudo_legal_moves;
+
+}
 
 /// @brief
 /// find legal moves for queen
 /// @return
 /// ULL mask of legal moves
-ULL find_queen_legal_moves(int position, ULL blockers) {
+ULL  find_queen_legal_moves(int position, ULL blockers) {
     ULL rook_legal_moves = blockerTable[position][r][blockers & lookupTable[position][r]];
     ULL bishop_legal_moves = blockerTable[position][b][blockers & lookupTable[position][b]];
     return  rook_legal_moves | bishop_legal_moves;
@@ -403,7 +489,6 @@ std::unordered_map<ULL, ULL> generate_blocker_map(int position, ULL movement_map
     }
     //calculating size of the map
     ULL number_of_possibilities = static_cast<unsigned long long>(std::pow(2, movement_indices.size()));
-
     for (int i = 0; i < number_of_possibilities; i++) {
         ULL blocker_map = 0;
         // std::cout << "runn" << std::endl;
@@ -417,8 +502,74 @@ std::unordered_map<ULL, ULL> generate_blocker_map(int position, ULL movement_map
         }
     }
 
+
     return blocker_to_legal_moves;
 }
+
+/// @brief
+/// Given a movement map, return all possible blocker positions
+/// @return
+/// std::map<ULL, ULL>, map with all possible blocker positions key is blocker mask, value is possible moves
+std::unordered_map<ULL, ULL> generate_blocker_map(int position, ULL movement_map, ULL (*find_legal_moves)(int,ULL,PieceType) ) {
+    std::vector<ULL> movement_indices;
+    std::unordered_map<ULL,ULL> blocker_to_legal_moves = std::unordered_map<ULL, ULL>();
+    for (int i = 0; i < 64; i++) {
+        ULL t = movement_map & (1ull << i) ;
+        if ((movement_map & (1ull << i)) != 0){
+            movement_indices.push_back(i);
+        }
+    }
+    //calculating size of the map
+    ULL number_of_possibilities = static_cast<unsigned long long>(std::pow(2, movement_indices.size()));
+
+    for (int i = 0; i < number_of_possibilities; i++) {
+        ULL blocker_map = 0;
+        // std::cout << "runn" << std::endl;
+        for (int j = 0; j < movement_indices.size(); j++) {
+            if ((i & (1ull << j)) != 0) {
+                blocker_map |= (1ull << movement_indices[j]);
+            }
+            // print_bit_board(blocker_map);
+            blocker_to_legal_moves[blocker_map] = find_legal_moves(position, blocker_map, white);
+            blocker_to_legal_moves[blocker_map] = find_legal_moves(position, blocker_map, black);
+
+            // print_bit_board(blocker_to_legal_moves[blocker_map]);
+        }
+    }
+
+
+    return blocker_to_legal_moves;
+}
+
+Move parseMoveStr(std::string& moveStr) {
+        Move move{};
+        move.isCastle = false;
+        move.isEnPassant = false;
+        move.pieceTaken = black; // black is none
+
+        // Basic format: e2e4 or e7e8Q
+        if (moveStr.length() < 4) {
+            // invalid move string, handle as you prefer
+            return move;
+        }
+
+        move.startPos = algToPos(moveStr.substr(0,2));
+        move.endPos = algToPos(moveStr.substr(2,2));
+
+        // Check for promotion (5th char)
+        if (moveStr.length() == 5) {
+            char promo = moveStr[4];
+            // Handle promotion here (you might want to extend Move struct to hold this)
+            // For now, just a print or future use
+            // e.g., move.promotion = promoCharToPiece(promo);
+        }
+
+        // You can add logic here to detect castling or en passant by startPos/endPos patterns
+
+        return move;
+    }
+
+
 
 /// @briefgenera
 /// Generate all blocker tables, for rook and bishop, to be used during legal move generation
@@ -430,9 +581,13 @@ BlockerTableArray generate_blocker_table(LookupTableArray& movement_lookup_table
         // std::cout << i << std::endl;
         table[i][r] = generate_blocker_map(63-i,movement_lookup_table[i][r],find_rook_legal_moves);
         table[i][b] = generate_blocker_map(63-i,movement_lookup_table[i][b],find_bishop_legal_moves);
+        table[i][P] = generate_blocker_map(i, movement_lookup_table[i][P], find_w_pawn_legal_moves);
+        table[i][p] = generate_blocker_map(i, movement_lookup_table[i][p], find_b_pawn_legal_moves);
+
         // noticed this was really slow guessing it has to do with
     }
     store_blocker_tables(table);
+    blockerTable = table;
     return table;
 }
 
@@ -448,14 +603,14 @@ bool validate_lookup_table(){
 }
 
 
-std::list<Move> get_legal_moves(Board * board){
+std::vector<Move> get_legal_moves(Board * board){
 
-    std::list<Move> whiteMoves;
-    std::list<Move> blackMoves;
+    std::vector<Move> whiteMoves;
+    std::vector<Move> blackMoves;
 
     // make sure the lookup table is assigned
     // (dont worry map.empty() is O(1) so this is fine for repeated use)
-    if (lookupTable[0].empty())
+    if (lookupTable[0].size() == 1)
     {
         lookupTable = load_lookup_tables();
         blockerTable = load_blocker_table();
@@ -472,13 +627,16 @@ std::list<Move> get_legal_moves(Board * board){
 
         // should give all moves, just need to classify some as takes, and make sure it doesn't put the king in danger
         if (blockerTable[i].find(pieceType%7) != nullptr) // 7 is difference between r and R in our enum
-            pseduo_legal_moves[i] = blockerTable[i][pieceType%7][lookupTable[i][pieceType%7] & blockers];
+            if (pieceType == p || pieceType == P)
+                pseduo_legal_moves[i] = blockerTable[i][pieceType][lookupTable[i][pieceType] & blockers];
+            else
+                pseduo_legal_moves[i] = blockerTable[i][pieceType%7][lookupTable[i][pieceType%7] & blockers];
 
-        else if (pieceType%7 == q)
-            pseduo_legal_moves[i] = find_queen_legal_moves(i,lookupTable[i][pieceType] & blockers);
-
+        else if (pieceType%7 == q) {
+            pseduo_legal_moves[i] = find_queen_legal_moves(i,lookupTable[i][pieceType%7] & blockers);
+        }
         else
-            pseduo_legal_moves[i] = lookupTable[i][pieceType];
+            pseduo_legal_moves[i] = lookupTable[i][pieceType%7];
 
         // current piece is black
         if(pieceType < white && pieceType != black) {
@@ -487,11 +645,12 @@ std::list<Move> get_legal_moves(Board * board){
             takes = pseduo_legal_moves[i] & board->bitboards[white];
 
             for (int j = 0; j < 64; j++) {
-                if ((takes & (1ull << j)) != 0) {
-                    blackMoves.push_back((Move) {i, j, false,false, pointToPiece[board->letterbox[63-j]]});
+                if ((takes & (canchor >> j)) != 0) {
+                    blackMoves.push_back((Move) {i, j, false,false, pointToPiece[board->letterbox[j]],pieceType,black,false});
                 }
-                else if ((pseduo_legal_moves[i]  & (1ull << j)) != 0) {
-                    blackMoves.push_back((Move) {i, j, false,false, pointToPiece[black]});
+                else if ((pseduo_legal_moves[i]  & canchor >> j) != 0) {
+                    // kind of gross black corresponds to 0 so no take is 0, consider adding a additional field
+                    blackMoves.push_back((Move) {i, j, false,false, pointToPiece[black],pieceType,black,false});
                 }
             }
         }
@@ -503,24 +662,45 @@ std::list<Move> get_legal_moves(Board * board){
             takes = pseduo_legal_moves[i] & board->bitboards[black];
 
             for (int j = 0; j < 64; j++) {
-                if ((takes & (1ull << j)) != 0) {
-                    whiteMoves.push_back((Move) {i, j, false,false, pointToPiece[board->letterbox[63-j]]});
+                if ((takes & canchor >> j) != 0) {
+                    whiteMoves.push_back((Move) {i, j, false,false, pointToPiece[board->letterbox[j]],pieceType,black,true});
                 }
-                else if ((pseduo_legal_moves[i]  & (1ull << j)) != 0) {
-                    whiteMoves.push_back((Move) {i, j, false,false, pointToPiece[black]});
+                else if ((pseduo_legal_moves[i]  & canchor >> j) != 0) {
+                    whiteMoves.push_back((Move) {i, j, false,false, pointToPiece[black],pieceType,black,true});
                 }
             }
         }
+        // blockers = pseduo_legal_moves[i] & (board->bitboards[white] | board->bitboards[black]);
+        //
+        //
+        // takes_legal_moves[i] = 0;
+    }
 
-        blockers = pseduo_legal_moves[i] & (board->bitboards[white] | board->bitboards[black]);
-
-
-        takes_legal_moves[i] = 0;
-
+    // doing en passant
+    if (board->en_passant != -1) { // en passant available
+        if (board->white) { // whites turn
+            if (board->bitboards[P] & (canchor >> board->en_passant+1) != 0) { // probably should check edge cases
+                whiteMoves.push_back((Move){board->en_passant+1,board->en_passant - 8, false,true,pointToPiece[board->letterbox[board->en_passant]],P,black,true});
+            }
+            if (board->bitboards[P] & (canchor >> board->en_passant-1)!= 0) {
+                whiteMoves.push_back((Move){board->en_passant-1,board->en_passant - 8, false,true,pointToPiece[board->letterbox[board->en_passant]],P,black,true});
+            }
+        }
+        else {
+            if (board->bitboards[p] & (canchor >> board->en_passant+1) != 0) { // probably should check edge cases
+                    whiteMoves.push_back((Move){board->en_passant+1,board->en_passant + 8, false,true,pointToPiece[board->letterbox[board->en_passant]],p,black,false});
+            }
+            if (board->bitboards[p] & (canchor >> board->en_passant-1)!= 0) {
+                whiteMoves.push_back((Move){board->en_passant-1,board->en_passant + 8, false,true,pointToPiece[board->letterbox[board->en_passant]],p,black,false});
+            }
+        }
     }
 
 
 
-    // STILL NEEDS TO BE IMPLEMENTED
-    return whiteMoves;
+    // STILL NEEDS TO BE IMPLEMENTED make moves legal lmao
+
+    if (board->white)
+            return whiteMoves;
+    return blackMoves;
 }

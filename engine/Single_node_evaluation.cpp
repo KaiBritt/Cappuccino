@@ -3,7 +3,8 @@
 //
 
 #include "Headers/Single_node_evaluation.hpp"
-
+// #include "voronoi.h"
+#include "Headers/Board.hpp"
 /// @brief uses binary XOR to flip the square index vertically (e.g. turn a1 into a8)
 /// @return int : vertically flipped index
 int flip_square(int index) {
@@ -19,8 +20,22 @@ int evaluate_node(const std::array<int,64>& board) {
     // calculate game phase for tapered evaluation
     const int phase = calculate_phase(board);
 
-    return (((evaluation.mgEvaluation * (256 - phase)) + (evaluation.egEvaluation * phase)) / 256);
+    return (((evaluation.mgEvaluation * (256 -  phase)) + (evaluation.egEvaluation * phase)) / 256);
 }
+
+// int evaluate_node_VD(const Board& board) {
+//     // calculate total value on the board and compare
+//     evaluations evaluation = evaluate_piece_values(board.letterbox);
+//     // calculate game phase for tapered evaluation
+//     const int phase = calculate_phase(board.letterbox);
+//     std::vector<ColoredPoint> pawn_graph;
+//     graphFromBitboard(pawn_graph,board.bitboards[P],0); // 0 is white
+//     graphFromBitboard(pawn_graph,board.bitboards[p],1);
+//     std::map<int, double> color_map = computeVDColorArea(pawn_graph,0,0,8,8);
+//     int color_dif = (int) (color_map[0] - color_map[1]);
+//     return (2*(evaluation.mgEvaluation * (256 - phase) + (evaluation.egEvaluation * phase)) / 256)/3 + ((1/3)  * color_dif);
+// }
+
 
 
 /// @brief uses piece square tables to adjust piece values and then sums them up in a total material evaluation

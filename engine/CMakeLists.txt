@@ -9,11 +9,18 @@ add_executable(engine
         Headers/middlegame_piecetables.hpp
         Headers/Board.hpp
         Headers/Moves.hpp
-        Headers/Visualisation.hpp
         Single_node_evaluation.cpp
         main.cpp
         Board.cpp
         Moves.cpp
-        Visualisation.cpp
-
+#        voronoi.cpp
+#        voronoi.h
+        minimax.cpp
+        Headers/minimax.h
 )
+
+#add_executable(voronoibb voronoiStandalone.cpp voronoi.h)
+
+#target_link_libraries(engine)
+
+#target_link_libraries(voronoibb PRIVATE gmp gmpxx mpfr)
