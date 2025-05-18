@@ -14,7 +14,7 @@
 void print_bit_board(unsigned long long bitboard) {
     for (int row = 0; row < 8; row++) {
         for (int col = 0; col < 8; col++) {
-            unsigned long long two_to_63 = 9223372036854775808UL;
+            unsigned long long two_to_63 = 1ULL << 63;
             if ((bitboard & (two_to_63 >> (row*8 + col))) != 0) {
                 printf("1");
             }

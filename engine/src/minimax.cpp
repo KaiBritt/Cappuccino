@@ -12,7 +12,7 @@ int minimax(Board& board, int depth, int alpha, int beta, bool maximizingPlayer)
         return evaluate_node(board.letterbox);  // Evaluation function (positive = good for White)
     }
 
-    std::vector<Move> moves = get_legal_moves(&board);
+    std::vector<Move> moves = get_legal_moves(&board).first;
 
     if (maximizingPlayer) {
         int maxEval = -1000000;
@@ -52,7 +52,7 @@ Move find_best_move(Board *board, int depth) {
     if (board->white){
         int bestScore = -100000000;
 
-        std::vector<Move> moves = get_legal_moves(board);
+        std::vector<Move> moves = get_legal_moves(board).first;
 
         for (Move& move : moves) {
             board->make_move(&move);
@@ -67,7 +67,7 @@ Move find_best_move(Board *board, int depth) {
     }
     else {
         int best_score = 1000000000;
-        std::vector<Move> moves = get_legal_moves(board);
+        std::vector<Move> moves = get_legal_moves(board).first;
         for (Move& move : moves) {
             board->make_move(&move);
             int score = minimax(*board, depth-1, -1000000000, 10000000, false);

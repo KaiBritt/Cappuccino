@@ -603,7 +603,7 @@ bool validate_lookup_table(){
 }
 
 
-std::vector<Move> get_legal_moves(Board * board){
+std::pair<std::vector<Move>,std::vector<Move>> get_legal_moves(Board * board){
 
     std::vector<Move> whiteMoves;
     std::vector<Move> blackMoves;
@@ -701,6 +701,6 @@ std::vector<Move> get_legal_moves(Board * board){
     // STILL NEEDS TO BE IMPLEMENTED make moves legal lmao
 
     if (board->white)
-            return whiteMoves;
-    return blackMoves;
+            return std::pair(whiteMoves,blackMoves);
+    return  std::pair(blackMoves,whiteMoves);;
 }

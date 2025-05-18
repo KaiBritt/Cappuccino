@@ -21,7 +21,7 @@ int main()
     // Board test_board = Board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     // std::cout << test_board.export_FEN() << std::endl;
     // print_letterbox(test_board.letterbox);
-    // auto legal_moves = get_legal_moves( &test_board);
+    // auto legal_moves = get_legal_moves( &test_board).first;
     // std::string player_move;
     // std::cin >> player_move;
     // std::cout << "num white moves: " << legal_moves.size() << std::endl;

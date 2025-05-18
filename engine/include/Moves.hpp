@@ -50,7 +50,7 @@ struct Move {
 };
 
 std::vector<Move> get_moves(std::map<int, ULL> pieceBitBoards);
-std::vector<Move> get_legal_moves(Board* board);
+std::pair<std::vector<Move>,std::vector<Move>> get_legal_moves(Board* board);
 
 Move parseMoveStr(std::string& str);
 ULL enemy_or_empty();
