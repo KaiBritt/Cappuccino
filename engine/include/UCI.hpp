@@ -14,15 +14,15 @@
 #include "../include/minimax.h"
 
 void uci_loop();
-void parse_uci_command(const std::string& command);
+void parse_uci_command(const std::string& command, Board& board);
 
 // commands
 void uci();
 void isReady();
-void setOption(const std::string& args);
-void newGame();
-void position(const std::string& args);
-void go(const std::string& args);
+void setOption(const std::vector<std::string>& args);
+void newGame(Board& board);
+void position(const std::vector<std::string> args, Board& board);
+void go(const std::vector<std::string>& args);
 void stop();
 void quit();
 

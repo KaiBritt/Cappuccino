@@ -3,15 +3,17 @@
 //
 
 #include "../include/UCI.hpp"
-
 #include "../include/Board.hpp"
+
 #define end std::endl
+
 
 void id() {
     // you already know who I am :pray:
     std::cout << "id name Cappuccino" << end;
     std::cout << "id author Mosh & Cinna" << end;
 }
+
 
 void ok() {
     // send options that you can change (or maybe you cant actually change it kekw)
@@ -24,21 +26,28 @@ void ok() {
 }
 
 
-void parse_uci_command(const std::string &command) {
-    
-    if (command == "uci")
+void parse_uci_command(const std::string &command, Board& board) {
+    // do magic to split the command by spaces
+    std::istringstream iss(command);
+    std::vector<std::string> tokens;
+    std::string token;
+    while (iss >> token) {
+        tokens.push_back(token);
+    }
+
+    if (tokens[0] == "uci")
         uci();
-    else if (command == "isready")
+    else if (tokens[0] == "isready")
         isReady();
-    else if (command == "ucinewgame")
-        newGame();
-    else if (command == "position")
-        position(command);
-    else if (command == "setoption")
-        setOption(command);
-    else if (command == "go")
-        go(command);
-    else if (command == "quit")
+    else if (tokens[0] == "ucinewgame")
+        newGame(board);
+    else if (tokens[0] == "position")
+        position(tokens, board);
+    else if (tokens[0] == "setoption")
+        setOption(tokens);
+    else if (tokens[0] == "go")
+        go(tokens);
+    else if (tokens[0] == "quit")
         quit();
 }
 
@@ -49,35 +58,64 @@ void uci() {
     ok();
 }
 
+
 void isReady() {
     std::cout << "readyok" << end;
 }
 
-void setOption(const std::string& args) {
+
+void setOption(const std::vector<std::string>& args) {
     return;
 }
 
-void newGame() {
+
+void newGame(Board& board) {
     // initialise our board as a brand new game
+    board = Board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
     std::cout << "isready" << end; // always gotta say we are ready
 }
 
-void position(const std::string& args) {
+
+void position(const std::vector<std::string> args, Board& board) {
+    // find the latest move
+    std::string lastMove = args.back();
+
+    // turn the latest move into an actual move
+    //TODO:
+
+    // make the move
+    // board.make_move()
 
     return;
 }
-void go(const std::string& args);
-void stop();
-void quit();
+
+
+void go(const std::vector<std::string>& args) {
+    return;
+}
+
+
+void stop() {
+    return;
+}
+
+
+void quit() {
+    exit(0);
+}
+
 
 void uci_loop() {
-    // get the command we just got sent
+    // initialise the board (just the starting pos board thingy)
+    Board board = Board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+
+    // initialise the line string thing command variable for later
     std::string line;
 
     // while there are still lines (commands) to read keep doing it. such is life
     while (std::getline(std::cin, line)) {
         if (line.empty()) continue; // ignore empty lines because they are empty...
-        parse_uci_command(line);
+        parse_uci_command(line, board);
     }
 }
