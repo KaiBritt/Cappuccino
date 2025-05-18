@@ -25,6 +25,7 @@ void ok() {
 
 
 void parse_uci_command(const std::string &command) {
+    
     if (command == "uci")
         uci();
     else if (command == "isready")
@@ -42,20 +43,35 @@ void parse_uci_command(const std::string &command) {
 }
 
 
-void uci();
-void isReady();
-void setOption(const std::string& args);
-void newGame();
-void position(const std::string& args);
+void uci() {
+    // say hi etc etc blah blah blah
+    id();
+    ok();
+}
+
+void isReady() {
+    std::cout << "readyok" << end;
+}
+
+void setOption(const std::string& args) {
+    return;
+}
+
+void newGame() {
+    // initialise our board as a brand new game
+
+    std::cout << "isready" << end; // always gotta say we are ready
+}
+
+void position(const std::string& args) {
+
+    return;
+}
 void go(const std::string& args);
 void stop();
 void quit();
 
 void uci_loop() {
-    // say hi!!!! :)
-    id();
-    ok();
-
     // get the command we just got sent
     std::string line;
 

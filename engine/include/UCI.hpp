@@ -7,6 +7,11 @@
 
 #include <string>
 #include <iostream>
+#include "../include/Moves.hpp"
+#include "../include/Global.hpp"
+#include "../include/Board.hpp"
+#include "../include/Single_node_evaluation.hpp"
+#include "../include/minimax.h"
 
 void uci_loop();
 void parse_uci_command(const std::string& command);

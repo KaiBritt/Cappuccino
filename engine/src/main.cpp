@@ -33,7 +33,7 @@ int main()
     // }
     // test_board.undo_move();
     // print_letterbox(test_board.letterbox);
-    std::cout << "start minimax" << std::endl;
+    // std::cout << "start minimax" << std::endl;
     Move best_move = find_best_move(&test_board,4);
     std::cout << evaluate_node(test_board.letterbox)<< std::endl;
     print_letterbox(test_board.letterbox);
